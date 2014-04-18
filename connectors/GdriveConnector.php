@@ -56,9 +56,9 @@ class GdriveConnector extends BaseConnector {
 		}
 	}
 	
-	public function uploadFile($source, $destination="/"){
+	public function uploadFile($source, $title, $destination="/"){
 		$file = new Google_Service_Drive_DriveFile();
-		$file->title = basename($source);
+		$file->title = $title;
 		$chunkSizeBytes = 1 * 1024 * 1024;
 		
 		// Call the API with the media upload, defer so it doesn't immediately return.
