@@ -13,6 +13,7 @@ class DropboxConnector extends BaseConnector {
 	private $appSecret;
 	private $redirectUri;
 	private $clientIdentifier;
+	private $_client;
 	
 	const SESSION_KEY_NAME = 'dropboxToken';
 	
@@ -22,12 +23,13 @@ class DropboxConnector extends BaseConnector {
 		$this->appSecret = $apiSecret;
 		$this->redirectUri = $redirectUri;
 		$this->clientIdentifier = $clientIdentifier;
+		
+		$this->loadToken();
 	}
 	
 	public function connect(){
 		$authorizeUrl = $this->getWebAuth($this->redirectUri)->start();
 		header("Location: $authorizeUrl");
-		
 	}
 	
 	private function getWebAuth($redirectUri){
@@ -48,6 +50,7 @@ class DropboxConnector extends BaseConnector {
 			assert($urlState === null);  
 			$_SESSION[self::SESSION_KEY_NAME] = array('accessToken'=>$accessToken,
 					'userId'=>$userId);
+			$this->loadToken();
 			return $_SESSION[self::SESSION_KEY_NAME];
 		}
 		catch (dbx\WebAuthException_BadRequest $ex) {
@@ -77,17 +80,24 @@ class DropboxConnector extends BaseConnector {
 		
 	}
 	
-	public function listFolders($path){
-		$folderMetadata = $dbxClient->getMetadataWithChildren($path);
-		print_r($folderMetadata);
+	public function listFolders($path='/'){
+		$folderMetadata = $this->_client->getMetadataWithChildren($path);
+		return $folderMetadata['contents'];
 	}
 	
-	public function downloadFile($ddSource, $destination){
-		$f = fopen("working-draft.txt", "w+b");
-		$fileMetadata = $dbxClient->getFile("/working-draft.txt", $f);
+	public function downloadFile($ddSource, $destinationPath){
+		$outputFile = $destinationPath.'/'.basename($ddSource).'.n3w.'.time();
+		$f = fopen($outputFile, "w+b");
+		$fileMetadata = $this->_client->getFile($ddSource, $f);
 		fclose($f);
-		print_r($fileMetadata);
+		return $outputFile;
 	}
 	
+	private function loadToken(){
+		if (DropboxConnector::isConnected()){
+			$r = $_SESSION[self::SESSION_KEY_NAME];
+			$this->_client = new dbx\Client($r['accessToken'], $this->clientIdentifier);
+		}
+	}
 	
 }
