@@ -12,7 +12,7 @@ $dropboxConnector = new DropboxConnector(null, null, null, 'zapstitch-demo/1.0')
 function copyFirstFile(){
 	global $gdriveConnector, $dropboxConnector;
 	$isFileFound = false;
-	$dirToLookup = '/Public'; // browse this directory to get a file
+	$dirToLookup = '/'; // browse this directory to get a file
 	// Download file if found in user's home directory
 	foreach ($dropboxConnector->listFolders($dirToLookup) as $item){
 		if ($item['is_dir'] != 1){
