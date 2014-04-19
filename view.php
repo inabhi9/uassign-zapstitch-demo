@@ -1,4 +1,6 @@
-
+<?php 
+	$copyButtonStatus = (DropboxConnector::isConnected() && GdriveConnector::isConnected()) ? "" : "disabled=disabled";
+?>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -10,7 +12,7 @@
     <meta name="author" content="">
     <link rel="shortcut icon" href="../../assets/ico/favicon.ico">
 
-    <title>Narrow Jumbotron Template for Bootstrap</title>
+    <title>Zapstitch Dropbox to GDrive File Copy Demo</title>
 
     <!-- Bootstrap core CSS -->
     <link href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css" rel="stylesheet">
@@ -37,16 +39,20 @@
           <li><a href="#">About</a></li>
           <li><a href="#">Contact</a></li>
         </ul>
-        <h3 class="text-muted">Project name</h3>
+        <h3 class="text-muted">Zapstitch demo</h3>
       </div>
 
-      <div class="jumbotron">
-        <h1>Jumbotron heading</h1>
-        <p class="lead">Cras justo odio, dapibus ac facilisis in, egestas eget quam. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus.</p>
-        <p><a class="btn btn-lg btn-success" href="#" role="button">Copy file</a></p>
-      </div>
-
-      <div class="row marketing">
+      <div>
+      	<div class="alert" id="alert" style="display: none">
+      		<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+      		<div id="alert-content">You are crazy...</div>
+      	</div>
+      	
+        <p class="lead">
+        	Copy your first dropbox file to google drive with ease. Simple connect to both of them
+        	and press copy button.
+        </p>
+        <div class="row marketing">
         <div class="col-lg-6">
 			<p>
 				<?php if (DropboxConnector::isConnected() == False) { ?>
@@ -64,7 +70,7 @@
         </div>
 
         <div class="col-lg-6">
-			<p>
+			<p style="float: right">
 				<?php if (GdriveConnector::isConnected() == False) { ?>
 					<a role="button" class="btn btn-lg btn-default" href="<?php echo $gdConnectUrl?>">
 						<img width="36" src="https://developers.google.com/drive/images/drive_icon.png">
@@ -78,10 +84,34 @@
 				<?php } ?>
 			</p>
         </div>
+      </div aligh="center">
+      
+      	<div class="progress progress-striped active" style="width: 300px; margin: auto; margin-bottom: 10px; display: none" id="copy-pbar">
+      	
+		  <div class="progress-bar"  role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%">
+		    <span class="sr-only">45% Complete</span>
+		    File is being copied
+		  </div>
+		  
+		</div>
+		
+        <p style="text-align: center">
+        	<button class="btn btn-lg btn-success" 
+        			href="javascript:void(0)"
+        			role="button"
+        			id="btnCopyfile"
+        			<?php echo $copyButtonStatus?>
+        			>
+        			
+        			Copy file
+        	</button>
+        </p>
       </div>
 
+      
+
       <div class="footer">
-        <p>&copy; Company 2014</p>
+        <p>&copy; NoName till earth ends</p>
       </div>
 
     </div> <!-- /container -->
@@ -89,6 +119,32 @@
 
     <!-- Bootstrap core JavaScript
     ================================================== -->
-    <!-- Placed at the end of the document so the pages load faster -->
+    <script type="text/javascript" src="//code.jquery.com/jquery-1.11.0.min.js"></script>
+    <script type="text/javascript" src="//getbootstrap.com/dist/js/bootstrap.min.js"></script>
+    
+    <script type="text/javascript">
+    	$inProgress = false;
+		$("#btnCopyfile").click(function(){
+			$.ajax({
+				url: 'action.php?action=copyFirstFile',
+				dataType: 'json',
+				beforeSend: function(){
+					if ($inProgress == true) return false;
+					$("#copy-pbar").show();
+					$inProgress = true; 
+					$("#btnCopyfile").attr("disabled", "disabled");
+				},
+				success: function(response){
+					$("#alert").attr("class", "alert alert-dismissable");
+					$("#alert").addClass("alert-"+response.type);
+					$("#alert-content").html(response.msg);
+					$("#alert").show();
+					$("#copy-pbar").hide();
+					$inProgress = false;
+					$("#btnCopyfile").removeAttr("disabled");
+				}
+			})
+		});
+    </script>
   </body>
 </html>
