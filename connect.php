@@ -1,15 +1,16 @@
 <?php
-include 'session.php';
-include 'connectors/DropboxConnector.php';
-include 'connectors/GdriveConnector.php';
-
-$appKey = '2zy6r4a4ycfpfrv';
-$appSecret = '39x02dv0vhzpqc5';
-$rU = 'http://localhost/playground/zapstitch-demo/connect.php?service=dropbox';
+include_once 'session.php';
+include_once 'connectors/DropboxConnector.php';
+include_once 'connectors/GdriveConnector.php';
+include_once 'config.php';
 
 $service = $_GET['service'];
 
 if ($service == "dropbox"){
+	$appKey = $config['dropbox']['appKey'];
+	$appSecret = $config['dropbox']['appSecret'];
+	$rU = $config['dropbox']['redirectUri'];
+	
 	$dropboxConnector = new DropboxConnector($appKey, $appSecret, $rU, 'zapstitch-demo/1.0');
 	
 	try{
@@ -19,9 +20,10 @@ if ($service == "dropbox"){
 		$dropboxConnector->connect();
 	}
 } else if ($service == "gdrive"){
-	$clientId = "164477918055.apps.googleusercontent.com";
-	$clientSecret = "xv4GumtfKL5eZ9yDKAG11042";
-	$rU = 'http://localhost/playground/zapstitch-demo/connect.php?service=gdrive';
+	$clientId = $config['gdrive']['clientId'];
+	$clientSecret = $config['gdrive']['clientSecret'];
+	$rU = $config['gdrive']['redirectUri'];
+	
 	$gdriveConnector = new GdriveConnector($clientId, $clientSecret, $rU);
 	try{
 		$gdriveConnector->connectFinish();
