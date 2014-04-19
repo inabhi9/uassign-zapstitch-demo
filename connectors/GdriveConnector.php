@@ -60,7 +60,7 @@ class GdriveConnector extends BaseConnector {
 		$file = new Google_Service_Drive_DriveFile();
 		$file->title = $title;
 		$chunkSizeBytes = 1 * 1024 * 1024;
-		
+		$mimeType = mime_content_type($source);
 		// Call the API with the media upload, defer so it doesn't immediately return.
 		$this->_client->setDefer(true);
 		$request = $this->_gservice->files->insert($file);
@@ -69,7 +69,7 @@ class GdriveConnector extends BaseConnector {
 		$media = new Google_Http_MediaFileUpload(
 				$this->_client,
 				$request,
-				'*/*',
+				$mimeType,
 				null,
 				true,
 				$chunkSizeBytes
